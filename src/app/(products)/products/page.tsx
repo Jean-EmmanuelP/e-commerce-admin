@@ -31,7 +31,7 @@ export default function Products() {
             <tr>
               <td>{product.title}</td>
               <td>
-                <Link href={`/products/edit/`}>
+                <Link href={`/products/edit/${product._id}`}>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
