@@ -5,12 +5,14 @@ import { redirect } from "next/navigation";
 import React, { useState } from "react";
 
 interface ProductFormProps {
-  title: string | null;
-  description: string | null;
-  price: number | null;
+  _id?: string;
+  title?: string | null;
+  description?: string | null;
+  price?: number | null;
 }
 
 export default function ProductForm({
+  _id,
   title: existingTitle,
   description: existingDescription,
   price: existingPrice,
@@ -20,10 +22,16 @@ export default function ProductForm({
   const [price, setPrice] = useState(existingPrice || 0);
   const [goToProducts, setGoToProducts] = useState(false);
 
-  async function createProduct(ev: React.FormEvent<HTMLFormElement>) {
+  async function saveProduct(ev: React.FormEvent<HTMLFormElement>) {
     ev.preventDefault();
     const data = { title, description, price };
-    await axios.post("/api/products", data);
+    if (_id) {
+      // update
+      await axios.put("/api/products", { ...data, _id });
+    } else {
+      // create
+      await axios.post("/api/products", data);
+    }
     setGoToProducts(true);
   }
 
@@ -31,7 +39,7 @@ export default function ProductForm({
     return redirect("/products");
   }
   return (
-    <form onSubmit={createProduct}>
+    <form onSubmit={saveProduct}>
       <label>Product name</label>
       <input
         type="text"
@@ -50,7 +58,7 @@ export default function ProductForm({
         type="number"
         placeholder="price"
         value={price}
-        onChange={(ev) => setPrice(ev.target.value)}
+        onChange={(ev) => setPrice(Number(ev.target.value))}
       />
       <button type="submit" className="btn-primary">
         Save
