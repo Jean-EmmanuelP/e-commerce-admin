@@ -42,17 +42,17 @@ export default function ProductForm({
   }
 
   async function uploadImages(ev: React.ChangeEvent<HTMLInputElement>) {
-    const { files } = ev.target
+    const { files } = ev.target;
 
-    if ( files!.length > 0 ) {
-      const fileList = Array.from(files!)
-      const data = new FormData()
-          fileList.forEach(async (file: File) => {
-            data.append('file', file)
-            const res = await axios.post('/api/upload', data)
-            console.log(file)
-            console.log(res.data)
-          })
+    if (files!.length > 0) {
+      const fileList = Array.from(files!);
+      const data = new FormData();
+      fileList.forEach(async (file: File) => {
+        data.append("file", file);
+        const res = await axios.post("/api/upload", data);
+        console.log(file);
+        console.log(res.data);
+      });
     }
   }
 
@@ -83,7 +83,7 @@ export default function ProductForm({
             />
           </svg>
           <div>Upload</div>
-          <input type="file"  onChange={uploadImages} className="hidden"/>
+          <input type="file" onChange={uploadImages} className="hidden" />
         </label>
         {!images?.length && <div>No photos in this product</div>}
       </div>
