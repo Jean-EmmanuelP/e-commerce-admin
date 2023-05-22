@@ -17,16 +17,18 @@ export default function ProductForm({
   title: existingTitle,
   description: existingDescription,
   price: existingPrice,
-  images,
+  images: existingImages,
 }: ProductFormProps) {
   const [title, setTitle] = useState(existingTitle || "");
   const [description, setDescription] = useState(existingDescription || "");
   const [price, setPrice] = useState(existingPrice || 0);
+  const [images, setImages] = useState(existingImages || []);
   const [goToProducts, setGoToProducts] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   async function saveProduct(ev: React.FormEvent<HTMLFormElement>) {
     ev.preventDefault();
-    const data = { title, description, price };
+    const data = { title, description, price, images };
     if (_id) {
       // update
       await axios.put("/api/products", { ...data, _id });
@@ -45,14 +47,18 @@ export default function ProductForm({
     const { files } = ev.target;
 
     if (files!.length > 0) {
+      setIsUploading(true);
       const fileList = Array.from(files!);
       const data = new FormData();
       fileList.forEach(async (file: File) => {
         data.append("file", file);
-        const res = await axios.post("/api/upload", data);
-        console.log(file);
-        console.log(res.data);
       });
+      const res = await axios.post("/api/upload", data);
+      setImages((oldImages: any) => {
+        return [...oldImages, ...res.data.links];
+      });
+      setIsUploading(false);
+      console.log(res.data);
     }
   }
 
@@ -66,7 +72,20 @@ export default function ProductForm({
         onChange={(ev) => setTitle(ev.target.value)}
       />
       <label>Photos</label>
-      <div className="mb-2">
+      <div className="mb-2 flex flex-wrap gap-2">
+        {!!images?.length &&
+          images.map((link: any) => (
+            <div key={link} className="h-24">
+              <img src={link} alt="" className="rounded-lg" />
+            </div>
+          ))}
+          {
+            isUploading && (
+              <div className="h-24">
+                <Spinner />
+              </div>
+            )
+          }
         <label className="w-24 h-24 border text-center cursor-pointer flex items-center justify-center text-sm gap-1 text-gray-500 rounded-lg bg-gray-200">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -85,7 +104,6 @@ export default function ProductForm({
           <div>Upload</div>
           <input type="file" onChange={uploadImages} className="hidden" />
         </label>
-        {!images?.length && <div>No photos in this product</div>}
       </div>
       <label>Description</label>
       <textarea
