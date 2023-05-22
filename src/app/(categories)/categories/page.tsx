@@ -5,9 +5,10 @@ import { useState } from "react";
 
 export default function Categories() {
   const [name, setName] = useState("");
-  async function saveCategory() {
-    await axios.post('/api/categories', {name})
-    setName('')
+  async function saveCategory(ev: any) {
+    ev.preventDefault();
+    await axios.post("/api/categories", { name });
+    setName("");
   }
 
   return (
@@ -19,13 +20,20 @@ export default function Categories() {
           className="mb-0"
           type="text"
           placeholder={"Category name"}
-          onChange={ev => setName(ev.target.value)}
+          onChange={(ev) => setName(ev.target.value)}
           value={name}
         />
         <button type="submit" className="btn-primary py-1">
           Save
         </button>
       </form>
+      <table>
+        <thead>
+          <tr>
+            <td>Category name</td>
+          </tr>
+        </thead>
+      </table>
     </Layout>
   );
 }
