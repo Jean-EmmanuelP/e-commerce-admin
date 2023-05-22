@@ -3,6 +3,7 @@
 import axios from "axios";
 import { redirect } from "next/navigation";
 import React, { useState } from "react";
+import Spinner from "../components/Spinner"
 
 interface ProductFormProps {
   _id?: string;
@@ -72,7 +73,7 @@ export default function ProductForm({
         onChange={(ev) => setTitle(ev.target.value)}
       />
       <label>Photos</label>
-      <div className="mb-2 flex flex-wrap gap-2">
+      <div className="mb-2 flex flex-wrap gap-1">
         {!!images?.length &&
           images.map((link: any) => (
             <div key={link} className="h-24">
@@ -81,7 +82,7 @@ export default function ProductForm({
           ))}
           {
             isUploading && (
-              <div className="h-24">
+              <div className="h-24 p-1 bg-gray-200 flex items-center">
                 <Spinner />
               </div>
             )
