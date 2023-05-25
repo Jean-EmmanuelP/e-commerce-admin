@@ -2,9 +2,9 @@
 
 import axios from "axios";
 import { redirect } from "next/navigation";
-import React, { useState } from "react";
-import Spinner from "../components/Spinner"
-import { ReactSortable } from "react-sortablejs"
+import React, { useEffect, useState } from "react";
+import Spinner from "../components/Spinner";
+import { ReactSortable } from "react-sortablejs";
 
 interface ProductFormProps {
   _id?: string;
@@ -12,6 +12,7 @@ interface ProductFormProps {
   description?: string | null;
   price?: number | null;
   images: any;
+  category: string | null;
 }
 
 export default function ProductForm({
@@ -20,17 +21,26 @@ export default function ProductForm({
   description: existingDescription,
   price: existingPrice,
   images: existingImages,
+  category: assignedCategory,
 }: ProductFormProps) {
   const [title, setTitle] = useState(existingTitle || "");
   const [description, setDescription] = useState(existingDescription || "");
+  const [category, setCategory] = useState(assignedCategory ||"");
   const [price, setPrice] = useState(existingPrice || 0);
   const [images, setImages] = useState(existingImages || []);
   const [goToProducts, setGoToProducts] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    axios.get("/api/categories").then((result) => {
+      setCategories(result.data);
+    });
+  }, []);
 
   async function saveProduct(ev: React.FormEvent<HTMLFormElement>) {
     ev.preventDefault();
-    const data = { title, description, price, images };
+    const data = { title, description, price, images, category };
     if (_id) {
       // update
       await axios.put("/api/products", { ...data, _id });
@@ -65,7 +75,7 @@ export default function ProductForm({
   }
 
   function updateImagesOrder(images: any) {
-    setImages(images)
+    setImages(images);
   }
   return (
     <form onSubmit={saveProduct}>
@@ -76,26 +86,31 @@ export default function ProductForm({
         value={title}
         onChange={(ev) => setTitle(ev.target.value)}
       />
+      <label>Category</label>
+      <select value={category} onChange={(ev) => setCategory(ev.target.value)}>
+        <option value="">Uncategorized</option>
+        {categories.length > 0 &&
+          categories.map((c: any) => <option value={c._id}>{c.name}</option>)}
+      </select>
       <label>Photos</label>
       <div className="mb-2 flex flex-wrap gap-1">
         <ReactSortable
           list={images}
           className="flex flex-wrap gap-1"
-          setList={updateImagesOrder}>
-        {!!images?.length &&
-          images.map((link: any) => (
-            <div key={link} className="h-24">
-              <img src={link} alt="" className="rounded-lg" />
-            </div>
-          ))}
-          </ReactSortable>
-          {
-            isUploading && (
-              <div className="h-24 p-1 bg-gray-200 flex items-center">
-                <Spinner />
+          setList={updateImagesOrder}
+        >
+          {!!images?.length &&
+            images.map((link: any) => (
+              <div key={link} className="h-24">
+                <img src={link} alt="" className="rounded-lg" />
               </div>
-            )
-          }
+            ))}
+        </ReactSortable>
+        {isUploading && (
+          <div className="h-24 p-1 bg-gray-200 flex items-center">
+            <Spinner />
+          </div>
+        )}
         <label className="w-24 h-24 border text-center cursor-pointer flex items-center justify-center text-sm gap-1 text-gray-500 rounded-lg bg-gray-200">
           <svg
             xmlns="http://www.w3.org/2000/svg"
