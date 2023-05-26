@@ -6,6 +6,13 @@ import React, { useEffect, useState } from "react";
 import Spinner from "../components/Spinner";
 import { ReactSortable } from "react-sortablejs";
 
+interface Category {
+  parent: any;
+  _id: string;
+  name: string;
+  properties: any[];
+}
+
 interface ProductFormProps {
   _id?: string;
   title?: string | null;
@@ -13,6 +20,10 @@ interface ProductFormProps {
   price?: number | null;
   images: any;
   category: string | null;
+}
+
+interface ProductProps {
+  [key: string]: any;
 }
 
 export default function ProductForm({
@@ -25,12 +36,13 @@ export default function ProductForm({
 }: ProductFormProps) {
   const [title, setTitle] = useState(existingTitle || "");
   const [description, setDescription] = useState(existingDescription || "");
-  const [category, setCategory] = useState(assignedCategory ||"");
+  const [category, setCategory] = useState(assignedCategory || "");
+  const [productProperties, setProductProperties] = useState<ProductProps>({});
   const [price, setPrice] = useState(existingPrice || 0);
   const [images, setImages] = useState(existingImages || []);
   const [goToProducts, setGoToProducts] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     axios.get("/api/categories").then((result) => {
@@ -77,6 +89,35 @@ export default function ProductForm({
   function updateImagesOrder(images: any) {
     setImages(images);
   }
+
+  const newProductProps: ProductProps = {};
+
+  function setProductProp(propName: string, value: any) {
+    setProductProperties((prev: ProductProps) => {
+      const newProductProps: ProductProps = { ...prev };
+      newProductProps[propName] = value;
+      return newProductProps;
+    });
+  }
+
+  const propertiesToFill = [];
+  if (categories.length > 0 && category) {
+    let CatInfo = categories.find(({ _id }) => _id === category);
+    console.log(CatInfo);
+    if (CatInfo && Array.isArray(CatInfo.properties)) {
+      propertiesToFill.push(...CatInfo.properties);
+      while (CatInfo?.parent?._id) {
+        const parentCat = categories.find(
+          ({ _id }) => _id === CatInfo?.parent?._id
+        );
+        if (parentCat) {
+          propertiesToFill.push(...parentCat.properties);
+          CatInfo = parentCat;
+        }
+      }
+    }
+  }
+
   return (
     <form onSubmit={saveProduct}>
       <label>Product name</label>
@@ -92,6 +133,17 @@ export default function ProductForm({
         {categories.length > 0 &&
           categories.map((c: any) => <option value={c._id}>{c.name}</option>)}
       </select>
+      {propertiesToFill.length > 0 &&
+        propertiesToFill.map((p) => (
+          <div className="flex gap-1">
+            <div>{p.name}</div>
+            <select value={productProperties[p.name]} onChange={(ev) => setProductProp(p.name, ev.target.value)}>
+              {p.values && p.values.map((v: any) => (
+                <option value={v}>{v}</option>
+              ))}
+            </select>
+          </div>
+        ))}
       <label>Photos</label>
       <div className="mb-2 flex flex-wrap gap-1">
         <ReactSortable
