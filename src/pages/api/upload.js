@@ -2,10 +2,15 @@ import multiparty from "multiparty";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import fs from "fs";
 import mime from "mime-types";
+import { mongooseConnect } from "../../app/lib/mongoose";
+import { isAdminRequest } from "./auth/[...nextauth]";
 
 const bucketName = "jean-emmanuel-next-ecommerce";
 
 export default async function handle(req, res) {
+  // await mongooseConnect();
+  // await isAdminRequest(req`, res);
+
   const form = new multiparty.Form();
 
   try {
@@ -28,7 +33,7 @@ export default async function handle(req, res) {
       },
     });
 
-    const links = []
+    const links = [];
     for (const file of files.file) {
       const ext = file.originalFilename.split(".").pop();
       const newFilename = Date.now() + "." + ext;
@@ -44,9 +49,9 @@ export default async function handle(req, res) {
         })
       );
       const link = `https://${bucketName}.s3.amazonaws.com/${newFilename}`;
-      links.push(link)
+      links.push(link);
     }
-    res.json({links});
+    res.json({ links });
   } catch (error) {
     console.error("An error occurred during form parsing", error);
     res.status(500).json("Internal Server Error");

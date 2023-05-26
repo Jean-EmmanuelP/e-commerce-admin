@@ -2,12 +2,14 @@
 import mongoose from "mongoose";
 import { Product } from "../../app/models/product";
 import { mongooseConnect } from "../../app/lib/mongoose";
+import { isAdminRequest } from "./auth/[...nextauth]";
 require("dotenv").config();
 
 export default async function handle(req, res) {
   const method = req.method;
 
   await mongooseConnect();
+  await isAdminRequest(req, res);
 
   if (method === "GET") {
     if (req.query?.id) {
