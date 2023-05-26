@@ -20,6 +20,7 @@ interface ProductFormProps {
   price?: number | null;
   images: any;
   category: string | null;
+  properties: string | null;
 }
 
 interface ProductProps {
@@ -33,11 +34,22 @@ export default function ProductForm({
   price: existingPrice,
   images: existingImages,
   category: assignedCategory,
+  properties: assignedProperties,
 }: ProductFormProps) {
   const [title, setTitle] = useState(existingTitle || "");
   const [description, setDescription] = useState(existingDescription || "");
   const [category, setCategory] = useState(assignedCategory || "");
-  const [productProperties, setProductProperties] = useState<ProductProps>({});
+  const [productProperties, setProductProperties] = useState<ProductProps>(
+    () => {
+      try {
+        return assignedProperties ? JSON.parse(assignedProperties) : {};
+      } catch (e) {
+        console.error("Error parsing assignedProperties", e);
+        return {};
+      }
+    }
+  );
+
   const [price, setPrice] = useState(existingPrice || 0);
   const [images, setImages] = useState(existingImages || []);
   const [goToProducts, setGoToProducts] = useState(false);
@@ -52,7 +64,14 @@ export default function ProductForm({
 
   async function saveProduct(ev: React.FormEvent<HTMLFormElement>) {
     ev.preventDefault();
-    const data = { title, description, price, images, category };
+    const data = {
+      title,
+      description,
+      price,
+      images,
+      category,
+      properties: productProperties,
+    };
     if (_id) {
       // update
       await axios.put("/api/products", { ...data, _id });
@@ -137,10 +156,12 @@ export default function ProductForm({
         propertiesToFill.map((p) => (
           <div className="flex gap-1">
             <div>{p.name}</div>
-            <select value={productProperties[p.name]} onChange={(ev) => setProductProp(p.name, ev.target.value)}>
-              {p.values && p.values.map((v: any) => (
-                <option value={v}>{v}</option>
-              ))}
+            <select
+              value={productProperties[p.name]}
+              onChange={(ev) => setProductProp(p.name, ev.target.value)}
+            >
+              {p.values &&
+                p.values.map((v: any) => <option value={v}>{v}</option>)}
             </select>
           </div>
         ))}

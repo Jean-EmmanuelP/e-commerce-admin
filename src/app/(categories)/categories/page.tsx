@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import Layout from "@/components/Layout";
 import Popup from "@/components/Popup";
@@ -13,7 +13,7 @@ interface Category {
 
 interface Property {
   name: string;
-  values: string;
+  values: string[];
 }
 
 export default function Categories() {
@@ -42,7 +42,7 @@ export default function Categories() {
       parentCategory,
       properties: properties.map((p) => ({
         name: p.name,
-        value: p.values.split(","),
+        values: p.values,
       })),
     };
     if (editedCategory) {
@@ -61,7 +61,10 @@ export default function Categories() {
     setEditedCategory(category);
     setName(category.name);
     setParentCategory(category.parent?._id);
-    setProperties(category.properties);
+    setProperties(category.properties.map((p: any) => ({
+      name: p.name,
+      values: p.values
+    })));
   }
 
   async function deleteCategory() {
@@ -79,7 +82,7 @@ export default function Categories() {
 
   function addProperty() {
     setProperties((prev: Property[]) => {
-      return [...prev, { name: "", values: "" }];
+      return [...prev, { name: "", values: [] }];
     });
   }
 
@@ -102,7 +105,7 @@ export default function Categories() {
   ) {
     setProperties((prev) => {
       const properties = [...prev];
-      properties[index].values = newValues;
+      properties[index].values = newValues.split(',');
       return properties;
     });
   }
@@ -167,7 +170,7 @@ export default function Categories() {
                   type="text"
                   className="mb-0"
                   placeholder="values, coma separated"
-                  value={property.values}
+                  value={property.values ? property.values.join(',') : ''}
                   onChange={(ev) =>
                     handlePropertyValuesChange(index, property, ev.target.value)
                   }
