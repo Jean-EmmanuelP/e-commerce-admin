@@ -176,7 +176,7 @@ export default function Categories() {
                   }
                 />
                 <button
-                  className="btn-default"
+                  className="btn-red"
                   type="button"
                   onClick={() => removeProperty(index)}
                 >
@@ -223,7 +223,7 @@ export default function Categories() {
                   <td>
                     <button
                       onClick={() => editCategory(category)}
-                      className="btn-primary mr-1"
+                      className="btn-default mr-1"
                     >
                       Edit
                     </button>
@@ -232,7 +232,7 @@ export default function Categories() {
                         setCategoryToDelete(category._id);
                         setPopupOpen(true);
                       }}
-                      className="btn-primary"
+                      className="btn-red"
                     >
                       Delete
                     </button>
