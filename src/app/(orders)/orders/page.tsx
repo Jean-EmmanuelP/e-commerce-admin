@@ -18,6 +18,7 @@ export default function OrderPage() {
         <thead>
           <tr>
             <th>Date</th>
+            <th>Paid</th>
             <th>Recipient</th>
             <th>Products</th>
           </tr>
@@ -26,7 +27,10 @@ export default function OrderPage() {
           {orders.length > 0 &&
             orders.map((order: any) => (
               <tr>
-                <td>{(new Date(order.createdAt)).toLocaleString()}</td>
+                <td>{new Date(order.createdAt).toLocaleString()}</td>
+                <td className={order.paid ? "text-green-600" : "text-red-600"}>
+                  {order.paid ? "YES" : "NO"}
+                </td>
                 <td>
                   {order.name}
                   {order.email}
